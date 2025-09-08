@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: AQUERO_PRUEBAS_BRZ_DB               # Nombre lógico del esquema en dbt
+    database: AQUERO_PRUEBAS_BRZ_DB  # Nombre de la base de datos
+    schema: AQUERO_PRUEBAS             # Nombre del esquema
+    tables:
+      - name: ORIGEN_AC_INF_DRVD_STG0155             # Nombre físico de la tabla
+        description: "Tabla 1 desde o02sire0 en pruebas_bronce_db"
+      - name: ORIGEN_AC_INF_DRVD_STG0156             # Nombre físico de la tabla
+        description: "Tabla 1 desde o02sire0 en pruebas_bronce_db"
+ 
