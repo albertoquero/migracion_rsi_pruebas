@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: iris
+    database: AQUERO_PRUEBAS_BRZ_DB        
+    schema: B02SIRE0             
+    tables:
+      - name: STG_INC00155
+      - name: STG_INC00156

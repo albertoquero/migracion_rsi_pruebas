@@ -3,8 +3,8 @@
     claves_primarias,
     campos_no_clave,
     fecha_inicio,
-    fecha_fin_col='fecha_fin',
-    fecha_inicio_col='fecha_inic'
+    fecha_fin_col='mi_fecha_fin',
+    fecha_inicio_col='mi_fecha_inic'
 ) %}
 
  -- Limpia y prepara la lista de columnas clave primaria y las que no lo son
@@ -24,7 +24,17 @@ datos_actuales AS (
 
 -- CTE que une todos los modelos base (nuevos datos) y filtra solo registros nuevos que no existen exactamente igual en destino
 nuevos_datos AS (
-  SELECT nuevo.*
+  SELECT 
+        
+    {% for col in pk_condicion %}
+      nuevo.{{ col }},  -- Claves
+    {% endfor %}
+    {% for col in valores_condicion %}
+      nuevo.{{ col }}{% if not loop.last %}, {% endif %}
+    {% endfor %}  -- Valor original
+    ,nuevo.{{ fecha_inicio_col }}  -- Fecha inicio versión antigua
+    ,nuevo.{{ fecha_fin_col }}   -- Fecha fin = fecha de carga actual
+    ,nuevo.fecha_modificacion
   FROM (
     {% for model in modelos_origen %} -- Sacamos cada modelo base al que es referenciado
       SELECT * FROM {{ ref(model) }}  
@@ -48,11 +58,12 @@ datos_a_cerrar AS (
     {% for col in pk_condicion %}
       actual.{{ col }},  -- Claves primarias
     {% endfor %}
-    actual.{{ fecha_inicio_col }},  -- Fecha inicio versión antigua
-    TO_DATE('{{ fecha_inicio }}', 'YYYY-MM-DD') AS {{ fecha_fin_col }},  -- Fecha fin = fecha de carga actual
     {% for col in valores_condicion %}
       actual.{{ col }}{% if not loop.last %}, {% endif %}
     {% endfor %}  -- Valor antiguo que vamos a cerrar
+    ,actual.{{ fecha_inicio_col }}  -- Fecha inicio versión antigua
+    ,TO_DATE('{{ fecha_inicio }}', 'DD/MM/YYYY') AS {{ fecha_fin_col }}  -- Fecha fin = fecha de carga actual
+    ,CURRENT_DATE AS FECHA_MODIFICACION
   FROM datos_actuales actual
   JOIN nuevos_datos nuevo
     ON
@@ -74,11 +85,12 @@ datos_no_afectados AS (
     {% for col in pk_condicion %}
       actual.{{ col }},  -- Claves
     {% endfor %}
-    actual.{{ fecha_inicio_col }},  -- Fecha inicio original
-    actual.{{ fecha_fin_col }},  -- Fecha fin original
     {% for col in valores_condicion %}
       actual.{{ col }}{% if not loop.last %}, {% endif %}
     {% endfor %}  -- Valor original
+    ,actual.{{ fecha_inicio_col }}  -- Fecha inicio original
+    ,actual.{{ fecha_fin_col }}  -- Fecha fin original
+    ,CURRENT_DATE AS FECHA_MODIFICACION
   FROM datos_actuales actual
   LEFT JOIN nuevos_datos nuevo
     ON
@@ -93,7 +105,7 @@ datos_no_afectados AS (
 SELECT * FROM nuevos_datos        -- Insertamos los nuevos registros abiertos
 UNION ALL
 SELECT * FROM datos_a_cerrar      -- Cerramos las versiones antiguas que cambiaron
-UNION ALL
-SELECT * FROM datos_no_afectados  -- Mantenemos las versiones sin cambios
+--UNION ALL
+--SELECT * FROM datos_no_afectados  -- Mantenemos las versiones sin cambios
 
 {% endmacro %}

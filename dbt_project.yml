@@ -36,7 +36,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 vars:
-  fecha_inicio: '2025-08-03'
+  fecha_inicio: '03/02/2025'
 
 models:
   my_new_project:
