@@ -77,35 +77,10 @@ datos_a_cerrar AS (
       {% endfor %}
       ) -- Valor diferente: indica cambio, cerrar versión
   WHERE actual.{{ fecha_fin_col }} = CAST('9999-12-31' AS DATETIME)  -- Solo versiones abiertas
-),
-
--- CTE para traer los registros que no se ven afectados (no hay cambios ni se deben cerrar)
-datos_no_afectados AS (
-  SELECT
-    {% for col in pk_condicion %}
-      actual.{{ col }},  -- Claves
-    {% endfor %}
-    {% for col in valores_condicion %}
-      actual.{{ col }}{% if not loop.last %}, {% endif %}
-    {% endfor %}  -- Valor original
-    ,actual.{{ fecha_inicio_col }}  -- Fecha inicio original
-    ,actual.{{ fecha_fin_col }}  -- Fecha fin original
-    ,CURRENT_DATE AS FECHA_MODIFICACION
-  FROM datos_actuales actual
-  LEFT JOIN nuevos_datos nuevo
-    ON
-      {% for col in pk_condicion %}
-        actual.{{ col }} = nuevo.{{ col }} {% if not loop.last %} AND {% endif %}  -- Coinciden claves
-      {% endfor %}
-  WHERE actual.{{ fecha_fin_col }} != CAST('9999-12-31' AS DATETIME)  -- Versiones cerradas (fechas fin distintas)
-     OR nuevo.{{ pk_condicion[0] }} IS NULL  -- O (es por entidad) que no fueron afectadas por nuevos datos
 )
-
 -- Finalmente combinamos todos los datos para el resultado final
 SELECT * FROM nuevos_datos        -- Insertamos los nuevos registros abiertos
 UNION ALL
 SELECT * FROM datos_a_cerrar      -- Cerramos las versiones antiguas que cambiaron
---UNION ALL
---SELECT * FROM datos_no_afectados  -- Mantenemos las versiones sin cambios
 
 {% endmacro %}

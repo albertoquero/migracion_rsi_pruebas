@@ -36,12 +36,19 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 vars:
-  fecha_inicio: '03/02/2025'
+  fecha_inicio: '02/02/2025'
 
 models:
   my_new_project:
     # Applies to all files under models/example/
-    example:
-      +materialized: table
-      pre-hook:
-        - "USE WAREHOUSE WH_BASICO"
+    bronce:
+      iris:
+        +materialized: view
+        +schema: 'B02SIRE0'
+        +database: 'AQUERO_PRUEBAS_BRZ_DB' 
+    plata:
+      sir:
+        +materialized: incremental
+        +schema: SIR
+        +database: AQUERO_PRUEBAS_SLVR_DB
+

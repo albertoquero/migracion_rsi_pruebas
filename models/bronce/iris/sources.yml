@@ -7,3 +7,4 @@ sources:
     tables:
       - name: STG_INC00155
       - name: STG_INC00156
+      - name: STG_INC01001

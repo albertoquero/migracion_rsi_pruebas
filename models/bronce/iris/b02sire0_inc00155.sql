@@ -1,11 +1,5 @@
-{{ config(
-    materialized='view'
-     ,schema='B02SIRE0'
-     ,database='AQUERO_PRUEBAS_BRZ_DB' 
-     
-) }}
-{% set fecha_inicio = var('fecha_inicio') %}
-{% set fecha1 = "TO_DATE('" ~ fecha_inicio ~ "', 'DD/MM/YYYY')" %}
+ 
+{% set fecha1 = "TO_DATE('" ~ var('fecha_inicio') ~ "', 'DD/MM/YYYY')" %}
 
 SELECT
     COD_NRBE_EN_W AS COD_NRBE_EN,
